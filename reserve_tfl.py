@@ -14,20 +14,21 @@ TOCK_USERNAME = "SET_YOUR_USER_NAME_HERE"
 TOCK_PASSWORD = "SET_YOUR_PASSWORD_HERE"
 
 # Set your specific reservation month and days
-RESERVATION_MONTH = 'November'
-RESERVATION_DAYS = ['23', '24', '25']
-RESERVATION_YEAR = '2021'
+RESERVATION_MONTH = 'January'
+RESERVATION_DAYS = ['10', '11','12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
+# RESERVATION_DAYS = ['30']
+RESERVATION_YEAR = '2022'
 RESERVATION_TIME_FORMAT = "%I:%M %p"
 
 # Set the time range for acceptable reservation times.
 # I.e., any available slots between 5:00 PM and 8:30 PM
 EARLIEST_TIME = "3:00 PM"
-LATEST_TIME = "8:30 PM"
+LATEST_TIME = "10:30 PM"
 RESERVATION_TIME_MIN = datetime.strptime(EARLIEST_TIME, RESERVATION_TIME_FORMAT)
 RESERVATION_TIME_MAX = datetime.strptime(LATEST_TIME, RESERVATION_TIME_FORMAT)
 
 # Set the party size for the reservation
-RESERVATION_SIZE = 4
+RESERVATION_SIZE = 2
 
 # Multithreading configurations
 NUM_THREADS = 1
@@ -91,7 +92,7 @@ class ReserveTFL():
 
         while not RESERVATION_FOUND:
             time.sleep(REFRESH_DELAY_MSEC / 1000)
-            self.driver.get("https://www.exploretock.com/tfl/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "22%3A00"))
+            self.driver.get("https://www.exploretock.com/Hayato/search?date=%s-0%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "22%3A00"))
             WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "div.ConsumerCalendar-month")))
 
             if not self.search_month():
@@ -99,13 +100,17 @@ class ReserveTFL():
                 continue
 
             WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "button.Consumer-resultsListItem.is-available")))
-
+            time.sleep(3)
+            checkValid = self.driver.find_elements(By.CSS_SELECTOR, "main.Checkout_content")
+            print(checkValid)
+            if checkValid == []:
+                continue
             print("Found availability. Sleeping for 10 minutes to complete reservation...")
             RESERVATION_FOUND = True
             time.sleep(BROWSER_CLOSE_DELAY_SEC)
 
     def login_tock(self):
-        self.driver.get("https://www.exploretock.com/tfl/login")
+        self.driver.get("https://www.exploretock.com/n-naka/login")
         WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.presence_of_element_located((By.NAME, "email")))
         self.driver.find_element(By.NAME, "email").send_keys(TOCK_USERNAME)
         self.driver.find_element(By.NAME, "password").send_keys(TOCK_PASSWORD)
@@ -138,6 +143,15 @@ class ReserveTFL():
 
                 if self.search_time():
                     print("Time found")
+
+                    # checkValid = self.driver.find_elements(By.CSS_SELECTOR, "main.Checkout_content")
+                    # print(checkValid)
+                    # if checkValid != []:
+                    #     print("it is not taken")
+                    #     return True
+                    # else:
+                    #     return True
+
                     return True
 
         return False
